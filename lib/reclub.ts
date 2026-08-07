@@ -243,6 +243,14 @@ export function fmtTimeRange(ts: number, durationSec: number): string {
   return `${d.toLocaleTimeString("en-GB", opts)} - ${e.toLocaleTimeString("en-GB", opts)} WIB`;
 }
 
+export function fmtTimeOnly(ts: number): string {
+  return new Date(ts * 1000).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Jakarta",
+  });
+}
+
 export function isUpcoming(a: Activity): boolean {
   return a.startDatetime > Math.floor(Date.now() / 1000);
 }
