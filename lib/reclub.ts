@@ -107,13 +107,106 @@ export async function getMeet(ref: string): Promise<MeetDetail> {
   return get<MeetDetail>(`/meets/by-ref/${ref}`);
 }
 
+/** Curated extra clubs not in the community top-40 (smaller/newer clubs). */
+const EXTRA_CLUB_SLUGS = ["ipadelclubid"];
+
 /** Batam community: metrics + top clubs. */
 export async function getBatamClubs(): Promise<Club[]> {
   const data = await get<{
     metrics: { groupsCount: number; activitiesCount: number };
     topClubs: Club[];
   }>("/communities/453/features");
-  return data.topClubs;
+  const clubs = [...data.topClubs];
+
+  // Add curated extras not covered by the community top-40.
+  const known = new Set(clubs.map((c) => c.slug));
+  for (const slug of EXTRA_CLUB_SLUGS) {
+    if (known.has(slug)) continue;
+    try {
+      const id = await resolveSlug(slug);
+      const club = await getClub(id);
+      clubs.push(club);
+    } catch {
+      // skip clubs that can't be resolved
+    }
+  }
+  return clubs;
+}
+
+// --- Schedule (calendar) aggregation -------------------------------------
+
+export interface ClubSummary {
+  id: number;
+  slug: string;
+  name: string;
+  members: number;
+}
+
+export interface SlimMeet {
+  id: number;
+  ref: string;
+  name: string;
+  start: number;
+  duration: number;
+  fee: number | null;
+  venue: string | null;
+  reserved: number;
+  players: number;
+  clubId: number;
+  clubName: string;
+  clubSlug: string;
+}
+
+async function mapLimit<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T, i: number) => Promise<R>
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+  async function worker() {
+    while (next < items.length) {
+      const i = next++;
+      results[i] = await fn(items[i], i);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => worker()));
+  return results;
+}
+
+/** All upcoming meets across every Batam club, flattened + sorted. */
+export async function getBatamMeets(limitPerClub = 30): Promise<{ clubs: ClubSummary[]; meets: SlimMeet[] }> {
+  const clubs = await getBatamClubs();
+  const results = await mapLimit(clubs, 8, (c) =>
+    getClubActivities(c.id, { upcoming: true, limit: limitPerClub }).catch(() => [])
+  );
+  const meets: SlimMeet[] = [];
+  results.forEach((acts, i) => {
+    const club = clubs[i];
+    for (const a of acts) {
+      meets.push({
+        id: a.id,
+        ref: a.referenceCode,
+        name: a.name,
+        start: a.startDatetime,
+        duration: a.duration,
+        fee: a.feeAmount ?? null,
+        venue: a.venue?.name ?? null,
+        reserved: a.numReserved,
+        players: a.numPlayers,
+        clubId: club.id,
+        clubName: club.name,
+        clubSlug: club.slug,
+      });
+    }
+  });
+  meets.sort((a, b) => a.start - b.start);
+  return {
+    clubs: clubs
+      .map((c) => ({ id: c.id, slug: c.slug, name: c.name, members: c.counts?.members ?? 0 }))
+      .sort((a, b) => a.name.localeCompare(b.name)),
+    meets,
+  };
 }
 
 export function fmtIDR(amount: number | null | undefined): string {
