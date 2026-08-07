@@ -42,10 +42,11 @@ export function DayModal({
     >
       <div className="absolute inset-0 bg-black/70" />
       <div
-        className={`relative w-full sm:max-w-xl max-h-[85vh] sm:max-h-[80vh] rounded-t-2xl sm:rounded-2xl bg-elev border border-line shadow-2xl flex flex-col transition-transform pb-[env(safe-area-inset-bottom)] ${open ? "translate-y-0" : "translate-y-8"}`}
+        className={`relative flex w-full flex-col overflow-hidden sm:max-w-xl max-h-[85dvh] sm:max-h-[80dvh] rounded-t-2xl sm:rounded-2xl bg-elev border border-line shadow-2xl transition-transform ${open ? "translate-y-0" : "translate-y-8"}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-line shrink-0">
+          <div className="absolute left-1/2 -translate-x-1/2 top-2 h-1 w-10 rounded-full bg-text-faint/40 sm:hidden" />
           <div>
             <h2 className="font-display text-2xl leading-none tracking-wide">{state.label}</h2>
             <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-text-faint">
@@ -60,7 +61,7 @@ export function DayModal({
             ✕
           </button>
         </div>
-        <div className="overflow-y-auto px-5 py-4 space-y-2.5">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-4 space-y-2.5 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           {sorted.map((m) => {
             const row = (
               <div className="flex items-start gap-3 rounded-xl border border-line bg-bg/60 p-3.5 hover:border-ball/40 transition">
