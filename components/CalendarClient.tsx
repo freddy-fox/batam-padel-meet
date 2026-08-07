@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { fmtIDR, fmtTimeOnly, type SlimMeet, type ClubSummary } from "@/lib/reclub";
 import { DayModal, type DayDetailState } from "@/components/DayModal";
+import { MultiSelect, type MultiOption } from "@/components/MultiSelect";
 
 const PALETTE = [
   "bg-lime-400 text-slate-950",
@@ -27,6 +28,15 @@ const MONTHS = [
 ];
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+/** Normalize a venue string so case/spacing variants collapse to one key. */
+export function venueKey(v: string): string {
+  return v
+    .toLowerCase()
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export default function CalendarClient({
   clubs,
   meets,
@@ -36,7 +46,17 @@ export default function CalendarClient({
 }) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const filter = (searchParams.get("club") ?? "").trim();
+
+  // Multi-select filters from URL params (?clubs=a,b&venues=x,y)
+  const selClubs = useMemo(() => (searchParams.get("clubs") ?? "").split(",").filter(Boolean), [searchParams]);
+  const selVenues = useMemo(() => (searchParams.get("venues") ?? "").split(",").filter(Boolean), [searchParams]);
+
+  const setParams = (clubsNext: string[], venuesNext: string[]) => {
+    const p = new URLSearchParams();
+    if (clubsNext.length) p.set("clubs", clubsNext.join(","));
+    if (venuesNext.length) p.set("venues", venuesNext.join(","));
+    router.replace(`?${p.toString()}`, { scroll: false });
+  };
 
   const [selectedDay, setSelectedDay] = useState<DayDetailState | null>(null);
 
@@ -46,14 +66,46 @@ export default function CalendarClient({
     return m;
   }, [clubs]);
 
-  const visibleClubs = useMemo(
+  // Location options derived from meets: venue label → normalized key
+  const venueOptions = useMemo<MultiOption[]>(() => {
+    const m = new Map<string, string>();
+    for (const meet of meets) {
+      const v = meet.venue?.trim();
+      if (!v) continue;
+      const key = venueKey(v);
+      if (!m.has(key)) m.set(key, v);
+    }
+    return [...m.entries()]
+      .sort((a, b) => a[1].localeCompare(b[1]))
+      .map(([value, label]) => ({ value, label }));
+  }, [meets]);
+
+  const clubOptions = useMemo<MultiOption[]>(
     () =>
-      filter
-        ? clubs.filter((c) => c.slug === filter || c.name.toLowerCase().includes(filter.toLowerCase()))
-        : clubs,
-    [clubs, filter]
+      clubs.map((c) => ({
+        value: c.slug,
+        label: c.name,
+        color: clubColor.get(c.slug),
+      })),
+    [clubs, clubColor]
   );
-  const visibleIds = useMemo(() => new Set(visibleClubs.map((c) => c.id)), [visibleClubs]);
+
+  // Meets matching both filter sets (empty = all)
+  const filteredMeets = useMemo(() => {
+    return meets.filter((m) => {
+      if (selClubs.length && !selClubs.includes(m.clubSlug)) return false;
+      if (selVenues.length && !(m.venue && selVenues.includes(venueKey(m.venue)))) return false;
+      return true;
+    });
+  }, [meets, selClubs, selVenues]);
+
+  const filteredClubIds = useMemo(() => {
+    const s = new Set<number>();
+    for (const m of filteredMeets) s.add(m.clubId);
+    return s;
+  }, [filteredMeets]);
+
+  const filteredClubCount = filteredClubIds.size;
 
   const now = useMemo(() => new Date(), []);
   const today = useMemo(() => new Date(now.getFullYear(), now.getMonth(), now.getDate()), [now]);
@@ -72,8 +124,7 @@ export default function CalendarClient({
 
   const meetsByDay = useMemo(() => {
     const m = new Map<string, SlimMeet[]>();
-    for (const meet of meets) {
-      if (!visibleIds.has(meet.clubId)) continue;
+    for (const meet of filteredMeets) {
       const d = new Date(meet.start * 1000);
       const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
       const arr = m.get(key) ?? [];
@@ -82,7 +133,7 @@ export default function CalendarClient({
     }
     for (const arr of m.values()) arr.sort((a, b) => a.start - b.start);
     return m;
-  }, [meets, visibleIds]);
+  }, [filteredMeets]);
 
   const days = useMemo(() => {
     const out: Date[] = [];
@@ -108,6 +159,8 @@ export default function CalendarClient({
 
   const clubName = (id: number) => clubs.find((c) => c.id === id)?.name ?? "?";
 
+  const hasFilter = selClubs.length > 0 || selVenues.length > 0;
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <section className="mb-6">
@@ -115,35 +168,35 @@ export default function CalendarClient({
           {MONTHS[today.getMonth()]} {today.getFullYear()}
         </h1>
         <p className="text-slate-400 mt-1">
-          {meets.length} upcoming meets across {clubs.length} clubs
+          {filteredMeets.length} upcoming meets
+          {hasFilter ? ` across ${filteredClubCount} clubs` : ` across ${clubs.length} clubs`}
         </p>
       </section>
 
-      {/* Club filter */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        <Link
-          href="/"
-          className={`text-xs font-bold px-3 py-1.5 rounded-full border transition ${
-            !filter ? "border-lime-400 bg-lime-400/10 text-lime-300" : "border-slate-700 text-slate-400 hover:border-slate-500"
-          }`}
-        >
-          All clubs
-        </Link>
-        {clubs.slice(0, 30).map((c) => (
-          <Link
-            key={c.id}
-            href={filter === c.slug ? "/" : `/?club=${c.slug}`}
-            className={`text-xs font-bold px-3 py-1.5 rounded-full border transition ${
-              filter === c.slug
-                ? "border-lime-400 bg-lime-400/10 text-lime-300"
-                : "border-slate-700 text-slate-400 hover:border-slate-500"
-            }`}
+      {/* Filter bar */}
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <MultiSelect
+          label="Clubs"
+          options={clubOptions}
+          selected={selClubs}
+          onChange={(next) => setParams(next, selVenues)}
+          placeholder="All clubs"
+        />
+        <MultiSelect
+          label="Locations"
+          options={venueOptions}
+          selected={selVenues}
+          onChange={(next) => setParams(selClubs, next)}
+          placeholder="All locations"
+        />
+        {hasFilter && (
+          <button
+            type="button"
+            onClick={() => setParams([], [])}
+            className="text-xs font-bold text-slate-400 hover:text-lime-300 underline underline-offset-2"
           >
-            {c.name}
-          </Link>
-        ))}
-        {clubs.length > 30 && (
-          <span className="text-xs text-slate-500 self-center">+{clubs.length - 30} more</span>
+            Reset filters
+          </button>
         )}
       </div>
 
@@ -166,15 +219,17 @@ export default function CalendarClient({
                 onClick={() => openDay(d)}
                 disabled={dayMeets.length === 0}
                 className={`min-h-28 border-slate-800/60 p-1.5 border-t border-l first:border-l-0 text-left align-top transition ${
-                  dayMeets.length === 0
-                    ? "cursor-default"
-                    : "cursor-pointer hover:bg-slate-800/40"
+                  dayMeets.length === 0 ? "cursor-default" : "cursor-pointer hover:bg-slate-800/40"
                 } ${isToday(d) ? "bg-lime-400/5" : ""}`}
               >
                 <div className="flex items-center justify-between px-1">
                   <span
                     className={`text-xs font-bold ${
-                      isToday(d) ? "text-lime-300" : d.getDay() === 0 || d.getDay() === 6 ? "text-slate-500" : "text-slate-300"
+                      isToday(d)
+                        ? "text-lime-300"
+                        : d.getDay() === 0 || d.getDay() === 6
+                          ? "text-slate-500"
+                          : "text-slate-300"
                     }`}
                   >
                     {d.getDate()}
@@ -218,14 +273,17 @@ export default function CalendarClient({
         </div>
       </div>
 
-      {/* Legend */}
+      {/* Legend for clubs present in the filtered view */}
       <div className="mt-4 flex flex-wrap gap-2">
-        {visibleClubs.slice(0, 40).map((c) => (
-          <span key={c.id} className="inline-flex items-center gap-1.5 text-xs text-slate-400">
-            <span className={`w-2.5 h-2.5 rounded-full ${clubColor.get(c.slug)}`} />
-            {c.name}
-          </span>
-        ))}
+        {clubs
+          .filter((c) => filteredClubIds.has(c.id))
+          .slice(0, 40)
+          .map((c) => (
+            <span key={c.id} className="inline-flex items-center gap-1.5 text-xs text-slate-400">
+              <span className={`w-2.5 h-2.5 rounded-full ${clubColor.get(c.slug)}`} />
+              {c.name}
+            </span>
+          ))}
       </div>
 
       <DayModal state={selectedDay} clubs={clubs} onClose={() => setSelectedDay(null)} />
