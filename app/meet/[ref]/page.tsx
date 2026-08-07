@@ -32,14 +32,16 @@ export default async function MeetPage(props: PageProps<"/meet/[ref]">) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <Link href="/" className="text-sm text-slate-400 hover:text-lime-300">
+      <Link href="/" className="font-mono text-xs uppercase tracking-[0.12em] text-text-faint hover:text-ball">
         ← All clubs
       </Link>
 
       <header className="mt-4 mb-6">
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">{meet.name}</h1>
-        <p className="mt-2 text-slate-300">{fmtDay(meet.startDatetime)}</p>
-        <p className="text-slate-400">{fmtTimeRange(meet.startDatetime, meet.duration)}</p>
+        <h1 className="font-display text-[clamp(32px,5vw,48px)] leading-[0.95] tracking-[0.02em]">
+          {meet.name}
+        </h1>
+        <p className="mt-3 text-text-dim">{fmtDay(meet.startDatetime)}</p>
+        <p className="font-mono text-[12.5px] text-text-faint">{fmtTimeRange(meet.startDatetime, meet.duration)}</p>
       </header>
 
       <div className="grid gap-3 sm:grid-cols-3 mb-8">
@@ -49,11 +51,11 @@ export default async function MeetPage(props: PageProps<"/meet/[ref]">) {
       </div>
 
       <section className="mb-8">
-        <h2 className="text-lg font-bold mb-3">
-          Players <span className="text-slate-500 font-normal">({joinedTotal} joined)</span>
+        <h2 className="font-display text-2xl tracking-wide mb-3">
+          Players <span className="font-mono text-sm text-text-faint normal-case">({joinedTotal} joined)</span>
         </h2>
         {joined.length === 0 ? (
-          <div className="rounded-xl border border-slate-800 p-8 text-center text-slate-400">
+          <div className="rounded-xl border border-line p-8 text-center text-text-dim">
             No confirmed players yet.
           </div>
         ) : (
@@ -61,16 +63,18 @@ export default async function MeetPage(props: PageProps<"/meet/[ref]">) {
             {joined.map((p) => {
               const profile = p.referenceId ? playerMap.get(p.referenceId) : undefined;
               return (
-                <li key={p.id} className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/50 p-3">
+                <li key={p.id} className="flex items-center gap-3 rounded-xl border border-line bg-elev p-3">
                   <Avatar p={p} profileName={profile?.name} imageUrl={profile?.imageUrl} />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate">
                       {profile?.name || p.customName || p.display || p.username || profile?.username || "Player"}
-                      {p.isHost && <span className="ml-2 text-xs text-lime-300 font-bold">HOST</span>}
+                      {p.isHost && <span className="ml-2 text-xs text-ball font-bold">HOST</span>}
                       {p.isCoach && <span className="ml-2 text-xs text-cyan-300 font-bold">COACH</span>}
                     </p>
                   </div>
-                  <span className="text-xs text-slate-400">{participantStatusLabel(p.status)}</span>
+                  <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-text-faint">
+                    {participantStatusLabel(p.status)}
+                  </span>
                 </li>
               );
             })}
@@ -80,17 +84,19 @@ export default async function MeetPage(props: PageProps<"/meet/[ref]">) {
 
       {(waitlisted.length > 0 || requested.length > 0) && (
         <section className="mb-8">
-          <h2 className="text-lg font-bold mb-3 text-slate-400">Waitlist & requests</h2>
+          <h2 className="font-display text-2xl tracking-wide mb-3 text-text-dim">Waitlist & requests</h2>
           <ul className="space-y-2">
             {[...waitlisted, ...requested].map((p) => {
               const profile = p.referenceId ? playerMap.get(p.referenceId) : undefined;
               return (
-                <li key={p.id} className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/30 p-3 opacity-70">
+                <li key={p.id} className="flex items-center gap-3 rounded-xl border border-line bg-elev/60 p-3 opacity-70">
                   <Avatar p={p} profileName={profile?.name} imageUrl={profile?.imageUrl} />
                   <p className="flex-1 font-semibold truncate">
                     {profile?.name || p.customName || p.display || p.username || profile?.username || "Player"}
                   </p>
-                  <span className="text-xs text-slate-400">{participantStatusLabel(p.status)}</span>
+                  <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-text-faint">
+                    {participantStatusLabel(p.status)}
+                  </span>
                 </li>
               );
             })}
@@ -100,16 +106,16 @@ export default async function MeetPage(props: PageProps<"/meet/[ref]">) {
 
       {meet.notes && (
         <section>
-          <h2 className="text-lg font-bold mb-3">Notes</h2>
-          <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 text-sm whitespace-pre-line">
+          <h2 className="font-display text-2xl tracking-wide mb-3">Notes</h2>
+          <div className="rounded-xl border border-line bg-elev p-4 text-sm whitespace-pre-line">
             {meet.notes}
           </div>
         </section>
       )}
 
-      <p className="mt-8 text-xs text-slate-500">
+      <p className="mt-8 font-mono text-[11px] text-text-faint">
         Join on Reclub:{" "}
-        <a href={`https://reclub.co/m/${ref}`} className="text-lime-300 hover:underline" target="_blank" rel="noreferrer">
+        <a href={`https://reclub.co/m/${ref}`} className="text-ball hover:underline" target="_blank" rel="noreferrer">
           https://reclub.co/m/{ref}
         </a>
       </p>
@@ -123,7 +129,7 @@ function Avatar({ p, profileName, imageUrl }: { p: Participant; profileName?: st
     return <img src={imageUrl} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />;
   }
   return (
-    <div className="grid place-items-center w-9 h-9 rounded-full bg-slate-700 text-xs font-bold shrink-0">
+    <div className="grid place-items-center w-9 h-9 rounded-full bg-elev2 text-xs font-bold shrink-0">
       {initials(profileName || p.customName || p.display || p.username || "?")}
     </div>
   );
@@ -131,10 +137,10 @@ function Avatar({ p, profileName, imageUrl }: { p: Participant; profileName?: st
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-      <p className="text-xs uppercase tracking-wide text-slate-500 font-bold">{label}</p>
+    <div className="rounded-xl border border-line bg-elev p-4">
+      <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-text-faint font-semibold">{label}</p>
       <p className="mt-1 font-bold">{value}</p>
-      {sub && <p className="mt-1 text-xs text-slate-400 leading-snug">{sub}</p>}
+      {sub && <p className="mt-1 text-xs text-text-dim leading-snug">{sub}</p>}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
   fmtTimeRange,
   fmtIDR,
   isFull,
+  joinedCount,
   type Activity,
 } from "@/lib/reclub";
 
@@ -32,51 +33,53 @@ export default async function ClubPage(props: PageProps<"/club/[slug]">) {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <Link href="/" className="text-sm text-slate-400 hover:text-lime-300">
+      <Link href="/" className="font-mono text-xs uppercase tracking-[0.12em] text-text-faint hover:text-ball">
         ← All clubs
       </Link>
 
       <header className="mt-4 mb-8">
-        <h1 className="text-3xl font-black tracking-tight">{club.name}</h1>
-        <p className="text-sm text-slate-400 mt-1">
+        <h1 className="font-display text-[clamp(36px,6vw,56px)] leading-[0.95] tracking-[0.02em]">
+          {club.name}
+        </h1>
+        <p className="mt-2 font-mono text-[12px] text-text-faint">
           {club.counts?.members?.toLocaleString() ?? "?"} members · {club.counts?.totalActivities ?? "?"} total activities
         </p>
         {club.description && (
-          <p className="mt-3 text-sm text-slate-300 whitespace-pre-line line-clamp-3">{club.description}</p>
+          <p className="mt-3 text-sm text-text-dim whitespace-pre-line line-clamp-3">{club.description}</p>
         )}
       </header>
 
       <section>
-        <h2 className="text-xl font-bold mb-4">Upcoming meets</h2>
+        <h2 className="font-display text-2xl tracking-wide mb-4">Upcoming meets</h2>
         {upcoming.length === 0 ? (
-          <div className="rounded-xl border border-slate-800 p-8 text-center text-slate-400">
+          <div className="rounded-xl border border-line p-8 text-center text-text-dim">
             No upcoming meets scheduled.
           </div>
         ) : (
           <div className="space-y-6">
             {Object.entries(grouped).map(([day, acts]) => (
               <div key={day}>
-                <h3 className="text-sm font-bold uppercase tracking-wide text-lime-300 mb-2">{day}</h3>
+                <h3 className="font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-ball mb-2">{day}</h3>
                 <div className="space-y-2">
                   {acts.map((a) => (
                     <Link
                       key={a.id}
                       href={`/meet/${a.referenceCode}`}
-                      className="block rounded-xl border border-slate-800 bg-slate-900/50 p-4 hover:border-lime-400/50 transition"
+                      className="block rounded-xl border border-line bg-elev p-4 hover:border-ball/50 transition"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <h4 className="font-semibold leading-snug">{a.name}</h4>
                         <span
-                          className={`shrink-0 text-xs font-bold px-2.5 py-1 rounded-full ${
-                            isFull(a) ? "bg-red-500/20 text-red-300" : "bg-emerald-500/20 text-emerald-300"
+                          className={`shrink-0 font-mono text-xs font-bold px-2.5 py-1 rounded-full ${
+                            isFull(a) ? "bg-coral/20 text-coral" : "bg-ball/15 text-ball"
                           }`}
                         >
-                          {a.numReserved}/{a.numPlayers}
+                          {joinedCount(a)}/{a.numPlayers}
                         </span>
                       </div>
-                      <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-400">
+                      <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11.5px] text-text-faint">
                         <span>{fmtTimeRange(a.startDatetime, a.duration)}</span>
-                        <span>{fmtIDR(a.feeAmount)}</span>
+                        <span className="text-coral">{fmtIDR(a.feeAmount)}</span>
                         <span>{a.venue?.name ?? "Venue TBD"}</span>
                       </div>
                     </Link>
@@ -90,13 +93,13 @@ export default async function ClubPage(props: PageProps<"/club/[slug]">) {
 
       {past.length > 0 && (
         <section className="mt-12">
-          <h2 className="text-xl font-bold mb-4">Recent past</h2>
+          <h2 className="font-display text-2xl tracking-wide mb-4">Recent past</h2>
           <div className="space-y-2">
             {past.map((a) => (
-              <div key={a.id} className="rounded-xl border border-slate-800 bg-slate-900/30 p-4 opacity-70">
+              <div key={a.id} className="rounded-xl border border-line bg-elev/50 p-4 opacity-70">
                 <div className="flex items-center justify-between gap-3">
                   <h4 className="font-semibold">{a.name}</h4>
-                  <span className="text-xs text-slate-500">{fmtTime(a.startDatetime)}</span>
+                  <span className="font-mono text-xs text-text-faint">{fmtTime(a.startDatetime)}</span>
                 </div>
               </div>
             ))}

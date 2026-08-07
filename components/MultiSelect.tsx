@@ -52,20 +52,26 @@ export function MultiSelect({
         onClick={() => setOpen((o) => !o)}
         className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
           open || selected.length > 0
-            ? "border-lime-400/70 text-lime-300"
-            : "border-slate-700 text-slate-300 hover:border-slate-500"
+            ? "border-ball/70 text-ball"
+            : "border-line bg-elev text-text-dim hover:border-text-faint hover:text-text"
         }`}
       >
-        <span className="text-slate-500">{label}</span>
-        <span className="max-w-44 truncate text-slate-200">{summary}</span>
-        <span className="text-[10px] text-slate-500">{open ? "▲" : "▼"}</span>
+        <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-text-faint">
+          {label}
+        </span>
+        <span className={`max-w-44 truncate ${selected.length > 0 ? "text-ball" : "text-text"}`}>
+          {summary}
+        </span>
+        <span className="text-[10px] text-text-faint">{open ? "▲" : "▼"}</span>
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-40 mt-1 w-72 rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
-          <div className="flex items-center justify-between border-b border-slate-800 px-3 py-2">
-            <span className="text-xs font-bold text-slate-400">{options.length} options</span>
+        <div className="absolute left-0 top-full z-40 mt-1 w-72 rounded-xl border border-line bg-elev shadow-2xl">
+          <div className="flex items-center justify-between border-b border-line px-3 py-2">
+            <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-text-faint">
+              {options.length} options
+            </span>
             {selected.length > 0 && (
-              <button type="button" onClick={clear} className="text-xs font-bold text-lime-300 hover:underline">
+              <button type="button" onClick={clear} className="text-xs font-bold text-ball hover:underline">
                 Clear
               </button>
             )}
@@ -79,14 +85,14 @@ export function MultiSelect({
                   type="button"
                   onClick={() => toggle(o.value)}
                   className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition ${
-                    on ? "bg-lime-400/10 text-lime-200" : "text-slate-300 hover:bg-slate-800"
+                    on ? "bg-ball/10 text-ball" : "text-text-dim hover:bg-elev2 hover:text-text"
                   }`}
                 >
                   {o.color && <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${o.color}`} />}
                   <span className="flex-1 truncate">{o.label}</span>
                   <span
                     className={`grid h-4 w-4 shrink-0 place-items-center rounded border text-[10px] font-black ${
-                      on ? "border-lime-400 bg-lime-400 text-slate-950" : "border-slate-600"
+                      on ? "border-ball bg-ball text-bg" : "border-text-faint"
                     }`}
                   >
                     {on ? "✓" : ""}

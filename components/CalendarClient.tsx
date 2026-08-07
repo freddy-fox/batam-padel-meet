@@ -8,18 +8,18 @@ import { DayModal, type DayDetailState } from "@/components/DayModal";
 import { MultiSelect, type MultiOption } from "@/components/MultiSelect";
 
 const PALETTE = [
-  "bg-lime-400 text-slate-950",
-  "bg-cyan-400 text-slate-950",
-  "bg-fuchsia-400 text-slate-950",
-  "bg-amber-400 text-slate-950",
-  "bg-emerald-400 text-slate-950",
-  "bg-rose-400 text-slate-950",
-  "bg-violet-400 text-slate-950",
-  "bg-orange-400 text-slate-950",
-  "bg-teal-400 text-slate-950",
-  "bg-blue-400 text-slate-950",
-  "bg-pink-400 text-slate-950",
-  "bg-indigo-400 text-slate-950",
+  "bg-lime-400",
+  "bg-cyan-400",
+  "bg-fuchsia-400",
+  "bg-amber-400",
+  "bg-emerald-400",
+  "bg-rose-400",
+  "bg-violet-400",
+  "bg-orange-400",
+  "bg-teal-400",
+  "bg-blue-400",
+  "bg-pink-400",
+  "bg-indigo-400",
 ];
 
 const MONTHS = [
@@ -164,17 +164,17 @@ export default function CalendarClient({
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <section className="mb-6">
-        <h1 className="text-3xl font-black tracking-tight">
-          {MONTHS[today.getMonth()]} {today.getFullYear()}
+        <h1 className="font-display text-[clamp(40px,7vw,64px)] leading-[0.95] tracking-[0.02em]">
+          {MONTHS[today.getMonth()]} <span className="text-ball">{today.getFullYear()}</span>
         </h1>
-        <p className="text-slate-400 mt-1">
+        <p className="mt-1 font-mono text-[12.5px] text-text-dim">
           {filteredMeets.length} upcoming meets
           {hasFilter ? ` across ${filteredClubCount} clubs` : ` across ${clubs.length} clubs`}
         </p>
       </section>
 
       {/* Filter bar */}
-      <div className="mb-6 flex flex-wrap items-center gap-3">
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-elev p-4">
         <MultiSelect
           label="Clubs"
           options={clubOptions}
@@ -193,7 +193,7 @@ export default function CalendarClient({
           <button
             type="button"
             onClick={() => setParams([], [])}
-            className="text-xs font-bold text-slate-400 hover:text-lime-300 underline underline-offset-2"
+            className="text-xs font-bold text-text-faint hover:text-ball underline underline-offset-2"
           >
             Reset filters
           </button>
@@ -201,10 +201,10 @@ export default function CalendarClient({
       </div>
 
       {/* Calendar */}
-      <div className="rounded-2xl border border-slate-800 overflow-hidden">
-        <div className="grid grid-cols-7 border-b border-slate-800 bg-slate-900/60">
+      <div className="rounded-2xl border border-line overflow-hidden bg-elev/40">
+        <div className="grid grid-cols-7 border-b border-line bg-elev/80">
           {DOW.map((d) => (
-            <div key={d} className="py-2 text-center text-xs font-bold uppercase tracking-wide text-slate-500">
+            <div key={d} className="py-2 text-center font-mono text-[10.5px] font-semibold uppercase tracking-[0.12em] text-text-faint">
               {d}
             </div>
           ))}
@@ -218,24 +218,24 @@ export default function CalendarClient({
                 key={key}
                 onClick={() => openDay(d)}
                 disabled={dayMeets.length === 0}
-                className={`min-h-28 border-slate-800/60 p-1.5 border-t border-l first:border-l-0 text-left align-top transition ${
-                  dayMeets.length === 0 ? "cursor-default" : "cursor-pointer hover:bg-slate-800/40"
-                } ${isToday(d) ? "bg-lime-400/5" : ""}`}
+                className={`min-h-28 border-line/60 p-1.5 border-t border-l first:border-l-0 text-left align-top transition ${
+                  dayMeets.length === 0 ? "cursor-default" : "cursor-pointer hover:bg-ball/5"
+                } ${isToday(d) ? "bg-ball/5" : ""}`}
               >
                 <div className="flex items-center justify-between px-1">
                   <span
                     className={`text-xs font-bold ${
                       isToday(d)
-                        ? "text-lime-300"
+                        ? "text-ball"
                         : d.getDay() === 0 || d.getDay() === 6
-                          ? "text-slate-500"
-                          : "text-slate-300"
+                          ? "text-text-faint"
+                          : "text-text-dim"
                     }`}
                   >
                     {d.getDate()}
                   </span>
                   {dayMeets.length > 0 && (
-                    <span className="text-[10px] text-slate-500">{dayMeets.length}×</span>
+                    <span className="font-mono text-[10px] text-text-faint">{dayMeets.length}×</span>
                   )}
                 </div>
                 <div className="mt-1 space-y-1 max-h-24 overflow-hidden">
@@ -243,7 +243,7 @@ export default function CalendarClient({
                     const chip = (
                       <span
                         title={`${m.name} · ${clubName(m.clubId)} · ${fmtTimeOnly(m.start)} · ${fmtIDR(m.fee)}`}
-                        className={`block rounded px-1.5 py-0.5 text-[10px] leading-tight font-semibold truncate ${clubColor.get(m.clubSlug) ?? "bg-slate-600"}`}
+                        className={`block rounded px-1.5 py-0.5 text-[10px] leading-tight font-semibold truncate ${clubColor.get(m.clubSlug) ?? "bg-elev2 text-text-dim"}`}
                       >
                         {fmtTimeOnly(m.start)} {m.name}
                       </span>
@@ -264,7 +264,7 @@ export default function CalendarClient({
                     );
                   })}
                   {dayMeets.length > 4 && (
-                    <div className="text-[10px] text-slate-500 px-1">+{dayMeets.length - 4} more</div>
+                    <div className="font-mono text-[10px] text-text-faint px-1">+{dayMeets.length - 4} more</div>
                   )}
                 </div>
               </button>
@@ -279,7 +279,7 @@ export default function CalendarClient({
           .filter((c) => filteredClubIds.has(c.id))
           .slice(0, 40)
           .map((c) => (
-            <span key={c.id} className="inline-flex items-center gap-1.5 text-xs text-slate-400">
+            <span key={c.id} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-text-dim">
               <span className={`w-2.5 h-2.5 rounded-full ${clubColor.get(c.slug)}`} />
               {c.name}
             </span>
