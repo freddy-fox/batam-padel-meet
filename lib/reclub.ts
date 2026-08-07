@@ -40,6 +40,7 @@ export interface Activity {
     location?: { address?: string; latitude?: number; longitude?: number } | null;
   } | null;
   participants?: Participant[];
+  participantsStatusCount?: { joined?: number } | null;
 }
 
 export interface Participant {
@@ -60,6 +61,15 @@ export interface MeetDetail extends Activity {
   accessToken?: string | null;
   community?: { id: number; name?: string } | null;
   hash?: string | null;
+  participantsStatusCount?: { joined?: number } | null;
+}
+
+export interface PlayerProfile {
+  userId: number;
+  username: string;
+  name?: string | null;
+  imageUrl?: string | null;
+  publicId?: string;
 }
 
 async function get<T>(path: string): Promise<T> {
@@ -105,6 +115,30 @@ export async function getClubActivities(
 /** Meet/activity detail (venue, participants). */
 export async function getMeet(ref: string): Promise<MeetDetail> {
   return get<MeetDetail>(`/meets/by-ref/${ref}`);
+}
+
+/** Resolve user profiles by user ids (public, no auth). */
+export async function getPlayers(userIds: number[]): Promise<PlayerProfile[]> {
+  if (userIds.length === 0) return [];
+  const data = await get<{ players: PlayerProfile[] }>(
+    `/players/userIds?userIds=${userIds.join(",")}`
+  );
+  return data.players ?? [];
+}
+
+/** Meet detail + resolved participant profiles. */
+export async function getMeetWithPlayers(ref: string) {
+  const meet = await getMeet(ref);
+  const ids = [...new Set((meet.participants ?? []).map((p) => p.referenceId).filter(Boolean))];
+  const players = ids.length > 0 ? await getPlayers(ids) : [];
+  const map = new Map<number, PlayerProfile>();
+  for (const p of players) map.set(p.userId, p);
+  return { meet, playerMap: map };
+}
+
+/** Count of joined participants from the participants list (status === 1). */
+export function joinedCount(a: Activity): number {
+  return (a.participants ?? []).filter((p) => p.status === 1).length;
 }
 
 /** Curated extra clubs not in the community top-40 (smaller/newer clubs). */
@@ -192,7 +226,7 @@ export async function getBatamMeets(limitPerClub = 30): Promise<{ clubs: ClubSum
         duration: a.duration,
         fee: a.feeAmount ?? null,
         venue: a.venue?.name ?? null,
-        reserved: a.numReserved,
+        reserved: a.participantsStatusCount?.joined ?? a.numReserved,
         players: a.numPlayers,
         clubId: club.id,
         clubName: club.name,
