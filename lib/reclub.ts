@@ -76,7 +76,11 @@ async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${API}${path}`, {
     headers: { "x-output-casing": "camelCase", "User-Agent": "BatamPadelMeets/1.0" },
   });
-  if (!res.ok) throw new Error(`Reclub ${path} -> ${res.status}`);
+  if (!res.ok) {
+    const err = new Error(`Reclub ${path} -> ${res.status}`) as Error & { status?: number };
+    err.status = res.status;
+    throw err;
+  }
   return res.json() as Promise<T>;
 }
 

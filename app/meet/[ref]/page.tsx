@@ -20,7 +20,38 @@ export default async function MeetPage(props: PageProps<"/meet/[ref]">) {
     const data = await getMeetWithPlayers(ref);
     meet = data.meet;
     playerMap = data.playerMap;
-  } catch {
+  } catch (err) {
+    const status = (err as Error & { status?: number }).status;
+    if (status === 403) {
+      return (
+        <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+          <Link href="/" className="font-mono text-xs uppercase tracking-[0.12em] text-text-faint hover:text-ball">
+            ← All meets
+          </Link>
+          <div className="mt-10 rounded-2xl border border-line bg-elev p-10">
+            <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-line/50">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4F14D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <h1 className="font-display text-3xl tracking-wide">This meet is private</h1>
+            <p className="mx-auto mt-3 max-w-md text-sm text-text-dim">
+              This meet exists on Reclub but its details are invite-only. The host hasn&apos;t made it public, so
+              we can&apos;t show players or venue info here.
+            </p>
+            <a
+              href={`https://reclub.co/m/${ref}`}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-6 inline-block rounded-lg border border-ball/60 px-5 py-2.5 text-sm font-bold text-ball hover:bg-ball/10"
+            >
+              Open on Reclub
+            </a>
+          </div>
+        </div>
+      );
+    }
     notFound();
   }
 

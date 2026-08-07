@@ -174,26 +174,28 @@ export default function CalendarClient({
       </section>
 
       {/* Filter bar */}
-      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-elev p-4">
-        <MultiSelect
-          label="Clubs"
-          options={clubOptions}
-          selected={selClubs}
-          onChange={(next) => setParams(next, selVenues)}
-          placeholder="All clubs"
-        />
-        <MultiSelect
-          label="Locations"
-          options={venueOptions}
-          selected={selVenues}
-          onChange={(next) => setParams(selClubs, next)}
-          placeholder="All locations"
-        />
+      <div className="mb-6 rounded-xl border border-line bg-elev p-3 sm:p-4">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+          <MultiSelect
+            label="Clubs"
+            options={clubOptions}
+            selected={selClubs}
+            onChange={(next) => setParams(next, selVenues)}
+            placeholder="All clubs"
+          />
+          <MultiSelect
+            label="Locations"
+            options={venueOptions}
+            selected={selVenues}
+            onChange={(next) => setParams(selClubs, next)}
+            placeholder="All locations"
+          />
+        </div>
         {hasFilter && (
           <button
             type="button"
             onClick={() => setParams([], [])}
-            className="text-xs font-bold text-text-faint hover:text-ball underline underline-offset-2"
+            className="mt-2 text-xs font-bold text-text-faint hover:text-ball underline underline-offset-2"
           >
             Reset filters
           </button>
@@ -245,7 +247,8 @@ export default function CalendarClient({
                         title={`${m.name} · ${clubName(m.clubId)} · ${fmtTimeOnly(m.start)} · ${fmtIDR(m.fee)}`}
                         className={`block rounded px-1.5 py-0.5 text-[10px] leading-tight font-semibold truncate ${clubColor.get(m.clubSlug) ?? "bg-elev2 text-text-dim"}`}
                       >
-                        {fmtTimeOnly(m.start)} {m.name}
+                        <span className="hidden sm:inline">{fmtTimeOnly(m.start)} </span>
+                        {m.name}
                       </span>
                     );
                     return m.ref ? (

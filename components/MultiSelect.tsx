@@ -50,7 +50,7 @@ export function MultiSelect({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+        className={`flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
           open || selected.length > 0
             ? "border-ball/70 text-ball"
             : "border-line bg-elev text-text-dim hover:border-text-faint hover:text-text"
@@ -65,7 +65,7 @@ export function MultiSelect({
         <span className="text-[10px] text-text-faint">{open ? "▲" : "▼"}</span>
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-40 mt-1 w-72 rounded-xl border border-line bg-elev shadow-2xl">
+        <div className="absolute left-0 sm:left-0 right-0 sm:right-auto top-full z-40 mt-1 w-full sm:w-72 rounded-xl border border-line bg-elev shadow-2xl">
           <div className="flex items-center justify-between border-b border-line px-3 py-2">
             <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-text-faint">
               {options.length} options

@@ -42,7 +42,7 @@ export function DayModal({
     >
       <div className="absolute inset-0 bg-black/70" />
       <div
-        className={`relative w-full sm:max-w-xl max-h-[85vh] sm:max-h-[80vh] rounded-t-2xl sm:rounded-2xl bg-elev border border-line shadow-2xl flex flex-col transition-transform ${open ? "translate-y-0" : "translate-y-8"}`}
+        className={`relative w-full sm:max-w-xl max-h-[85vh] sm:max-h-[80vh] rounded-t-2xl sm:rounded-2xl bg-elev border border-line shadow-2xl flex flex-col transition-transform pb-[env(safe-area-inset-bottom)] ${open ? "translate-y-0" : "translate-y-8"}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-line shrink-0">

@@ -12,6 +12,8 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   manifest: "/manifest.webmanifest",
+  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
+  themeColor: "#0D1512",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -28,8 +30,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col bg-bg text-[#f2f3ee]">
         <header className="border-b border-line bg-bg/80 backdrop-blur sticky top-0 z-10">
           <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
-            <a href="/" className="flex items-center gap-3">
-              <svg width="36" height="36" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="shrink-0">
+            <a href="/" className="flex items-center gap-2 sm:gap-3">
+              <svg width="32" height="32" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="shrink-0 sm:w-9 sm:h-9">
                 <defs>
                   <clipPath id="bpm-logo-rounded">
                     <rect x="0" y="0" width="64" height="64" rx="14" ry="14" />
@@ -44,11 +46,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                   <circle cx="32" cy="34" r="2.6" fill="#0D1512" />
                 </g>
               </svg>
-              <span className="font-display text-2xl tracking-wide leading-none">
+              <span className="font-display text-xl sm:text-2xl tracking-wide leading-none whitespace-nowrap">
                 Batam Padel <span className="text-ball">Meets</span>
               </span>
             </a>
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-dim">
+            <span className="hidden sm:block font-mono text-[11px] uppercase tracking-[0.18em] text-text-dim">
               Schedule + players tracker
             </span>
           </div>
