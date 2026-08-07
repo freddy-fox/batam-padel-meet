@@ -218,7 +218,7 @@ export default function CalendarClient({
                 key={key}
                 onClick={() => openDay(d)}
                 disabled={dayMeets.length === 0}
-                className={`min-h-28 border-line/60 p-1.5 border-t border-l first:border-l-0 text-left align-top transition ${
+                className={`min-h-32 border-line/60 p-1.5 border-t border-l first:border-l-0 text-left align-top transition ${
                   dayMeets.length === 0 ? "cursor-default" : "cursor-pointer hover:bg-ball/5"
                 } ${isToday(d) ? "bg-ball/5" : ""}`}
               >
