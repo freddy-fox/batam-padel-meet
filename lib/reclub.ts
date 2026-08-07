@@ -73,9 +73,24 @@ export interface PlayerProfile {
 }
 
 async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
-    headers: { "x-output-casing": "camelCase", "User-Agent": "BatamPadelMeets/1.0" },
-  });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
+  let res: Response;
+  try {
+    res = await fetch(`${API}${path}`, {
+      headers: { "x-output-casing": "camelCase", "User-Agent": "BatamPadelMeets/1.0" },
+      signal: controller.signal,
+    });
+  } catch (err) {
+    clearTimeout(timer);
+    const aborted = (err as Error).name === "AbortError";
+    const wrapped = new Error(
+      aborted ? `Reclub ${path} -> timeout` : `Reclub ${path} -> fetch failed: ${(err as Error).message}`
+    ) as Error & { status?: number };
+    if (!aborted) wrapped.status = 0;
+    throw wrapped;
+  }
+  clearTimeout(timer);
   if (!res.ok) {
     const err = new Error(`Reclub ${path} -> ${res.status}`) as Error & { status?: number };
     err.status = res.status;
@@ -215,8 +230,8 @@ async function mapLimit<T, R>(
 /** All upcoming meets across every Batam club, flattened + sorted. */
 export async function getBatamMeets(limitPerClub = 30): Promise<{ clubs: ClubSummary[]; meets: SlimMeet[] }> {
   const clubs = await getBatamClubs();
-  const results = await mapLimit(clubs, 8, (c) =>
-    getClubActivities(c.id, { upcoming: true, limit: limitPerClub }).catch(() => [])
+  const results = await Promise.all(
+    clubs.map((c) => getClubActivities(c.id, { upcoming: true, limit: limitPerClub }).catch(() => []))
   );
   const meets: SlimMeet[] = [];
   results.forEach((acts, i) => {
