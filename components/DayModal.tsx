@@ -37,16 +37,15 @@ export function DayModal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity ${open ? "opacity-100" : "opacity-0"}`}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity ${open ? "opacity-100" : "opacity-0"}`}
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/70" />
       <div
-        className={`relative flex w-full flex-col overflow-hidden sm:max-w-xl max-h-[85dvh] sm:max-h-[80dvh] rounded-t-2xl sm:rounded-2xl bg-elev border border-line shadow-2xl transition-transform ${open ? "translate-y-0" : "translate-y-8"}`}
+        className={`relative flex w-full flex-col overflow-hidden sm:max-w-xl max-h-[85dvh] rounded-2xl bg-elev border border-line shadow-2xl transition-transform ${open ? "translate-y-0" : "translate-y-8"}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-line shrink-0">
-          <div className="absolute left-1/2 -translate-x-1/2 top-2 h-1 w-10 rounded-full bg-text-faint/40 sm:hidden" />
           <div>
             <h2 className="font-display text-2xl leading-none tracking-wide">{state.label}</h2>
             <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-text-faint">
