@@ -1,0 +1,27 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="roundedSquare">
+      <rect x="0" y="0" width="64" height="64" rx="14" ry="14"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#roundedSquare)">
+    <!-- Court-green background -->
+    <rect x="0" y="0" width="64" height="64" fill="#0D1512"/>
+
+    <!-- Subtle radial glow, echoing the site background -->
+    <ellipse cx="32" cy="8" rx="34" ry="20" fill="#D4F14D" opacity="0.10"/>
+
+    <!-- Padel ball -->
+    <circle cx="32" cy="34" r="19" fill="#D4F14D"/>
+
+    <!-- Ball seam lines -->
+    <path d="M 15 24 Q 32 34 15 44"
+          fill="none" stroke="#0D1512" stroke-width="3" stroke-linecap="round"/>
+    <path d="M 49 24 Q 32 34 49 44"
+          fill="none" stroke="#0D1512" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Perforation dots, echoing the ticket-stub motif -->
+    <circle cx="32" cy="34" r="2.6" fill="#0D1512"/>
+  </g>
+</svg>
